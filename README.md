@@ -40,5 +40,29 @@ docker run \
   --publish 50000:50000 \
   --volume jenkins-data:/var/jenkins_home \
   --volume jenkins-docker-certs:/certs/client:ro \
+  --volume /var/run/docker.sock:/var/run/docker.sock \
   myjenkins-blueocean:2.479.1-1
+```
+
+O usuário jenkins do container recém criado ainda não possui permissão sobre o socket file docker.sock.
+Para conceder permissão, adicionaremos jenkins ao grupo docker, que é por padrão o grupo associado ao docker.sock.
+
+No host, visualizar o GID do grupo docker
+```bash
+getent group docker
+>> docker:x:988:
+```
+
+No container, criar o grupo docker associando o GID do grupo do host, e adicionar jenkins a ele
+```bash
+# No host
+sudo docker exec -it --user root jenkins-blueocean bash
+
+# No container
+root> groupadd -g 988 docker
+root> usermod -aG docker jenkins
+
+# ctrl + d para sair do container
+
+sudo docker restart jenkins-blueocean
 ```
