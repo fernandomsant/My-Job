@@ -5,7 +5,7 @@ Docker Server 24.0.5
 
 Criando a rede na qual os containers serão inseridos
 ```bash
-docker network create jenkins
+sudo docker network create jenkins
 ```
 
 Adicione o seguinte Dockerfile ao seu build environment
@@ -26,12 +26,12 @@ RUN jenkins-plugin-cli --plugins "blueocean docker-workflow"
 
 Construa a imagem do Jenkins a partir do Dockerfile acima
 ```bash
-docker build -t myjenkins-blueocean:2.479.1-1 .
+sudo docker build -t myjenkins-blueocean:2.479.1-1 .
 ```
 
 Crie o container a partir desta imagem
 ```bash
-docker run \
+sudo docker run \
   --name jenkins-blueocean \
   --restart=on-failure \
   --detach \
@@ -45,15 +45,26 @@ docker run \
 ```
 
 O usuário jenkins do container recém criado ainda não possui permissão sobre o socket file docker.sock.
-Para conceder permissão, adicionaremos jenkins ao grupo docker, que é por padrão o grupo associado ao docker.sock.
+Para conceder permissão, adicionaremos jenkins ao grupo docker e associaremos este grupo ao socket file.
 
-No host, visualizar o GID do grupo docker
+No host, visualizar o GID do grupo docker<br>
+*Caso grupo docker já exista:*
 ```bash
 getent group docker
 >> docker:x:988:
+# GID 988
+```
+*Caso grupo docker não exista:*
+```bash
+sudo groupadd group docker
+getent group docker
+>> docker:x:1001:
+# GID 1001
+
+sudo chgrp docker /var/run/docker.sock
 ```
 
-No container, criar o grupo docker associando o GID do grupo do host, e adicionar jenkins a ele
+No container, criar o grupo docker associando o GID do grupo no host e adicionar jenkins a ele
 ```bash
 # No host
 sudo docker exec -it --user root jenkins-blueocean bash
