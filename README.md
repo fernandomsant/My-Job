@@ -3,7 +3,7 @@ Ubuntu 24.04.1<br>
 Docker Client 24.0.5<br>
 Docker Server 24.0.5
 
-Criando a rede na qual os containers serÃ£o inseridos
+Criando a rede na qual os containers serão inseridos
 ```bash
 docker network create jenkins
 ```
